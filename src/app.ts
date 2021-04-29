@@ -5,6 +5,7 @@ import * as morgan from "morgan";
 // import { CONFIG, Configuration } from "./config";
 import { Configuration } from "./config";
 // import { NodoAttivaRPT, NodoVerificaRPT } from "./fixtures/nodoRPTResponses";
+import { paVerifyPaymentNoticeRes } from "./fixtures/nodoRPTResponses";
 // import * as FespCdClient from "./services/pagopa_api/FespCdClient";
 import { logger } from "./utils/logger";
 
@@ -140,8 +141,14 @@ export async function newExpressApp(
     // }
 
     // 3) The SOAP request is a paVerifyPaymentNotice request
+
+    const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
+      esito: "OK",
+    });
     if (soapRequest["nod:paverifypaymentnoticereq"]) {
-      return res.status(200).send("dajeeeeeee");
+      return res
+        .status(paVerifyPaymentNoticeResponse[0])
+        .send(paVerifyPaymentNoticeResponse[1]);
     }
     // The SOAP Request not implemented
     res.status(404).send("Not found");

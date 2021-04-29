@@ -87,37 +87,34 @@ export const paVerifyPaymentNoticeRes = (
   params: INodoRPTRequest
 ): MockResponse => [
   200,
-  `<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
-<s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-        xmlns:ppt="http://ws.pagamenti.telematici.gov/">
-  <nodoVerificaRPTRisposta>
-    <ppt:nodoVerificaRPTRisposta>
-      <esito>${params.esito}</esito>
-      ${
-        params.datiPagamento
-          ? // tslint:disable-next-line: no-nested-template-literals
-            `<datiPagamentoPA>
-            <causaleVersamento>Causale versamento mock</causaleVersamento>
-            <ibanAccredito>IT47L0300203280645139156879</ibanAccredito>
-            <importoSingoloVersamento>${params.datiPagamento.importoSingoloVersamento}</importoSingoloVersamento>
-      </datiPagamentoPA>`
-          : ""
-      }
-      
-      ${
-        params.fault
-          ? // tslint:disable-next-line: no-nested-template-literals
-            `<fault>
-        <faultCode>${params.fault.faultCode}</faultCode>
-        <faultString>${params.fault.faultString}</faultString>
-        <id>${params.fault.id}</id>
-      </fault>`
-          : ""
-      }
-    </ppt:nodoVerificaRPTRisposta>
-  </nodoVerificaRPTRisposta>
-</s:Body>
-</s:Envelope>`,
+  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
+  <soapenv:Header />
+  <soapenv:Body>
+    <paf:paVerifyPaymentNoticeRes>
+      <outcome>OK</outcome>
+      <!--Optional:-->
+      <paymentList>
+        <!--1 to 5 repetitions:-->
+        <paymentOptionDescription>
+          <amount>100.00</amount>
+          <options>EQ</options>
+          <!--Optional:-->
+          <dueDate>2020-01-01</dueDate>
+          <!--Optional:-->
+          <detailDescription>?</detailDescription>
+          <!--Optional:-->
+          <transferType>POSTAL</transferType>
+        </paymentOptionDescription>
+      </paymentList>
+      <!--Optional:-->
+      <paymentDescription>?</paymentDescription>
+      <!--Optional:-->
+      <fiscalCodePA>12345678900</fiscalCodePA>
+      <!--Optional:-->
+      <companyName>?</companyName>
+      <!--Optional:-->
+      <officeName>?</officeName>
+    </paf:paVerifyPaymentNoticeRes>
+  </soapenv:Body>
+</soapenv:Envelope>`,
 ];
