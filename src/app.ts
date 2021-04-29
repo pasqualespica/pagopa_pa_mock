@@ -1,10 +1,11 @@
 import * as express from "express";
 import * as bodyParserXml from "express-xml-bodyparser";
-import { IWithinRangeStringTag } from "italia-ts-commons/lib/strings";
+// import { IWithinRangeStringTag } from "italia-ts-commons/lib/strings";
 import * as morgan from "morgan";
-import { CONFIG, Configuration } from "./config";
-import { NodoAttivaRPT, NodoVerificaRPT } from "./fixtures/nodoRPTResponses";
-import * as FespCdClient from "./services/pagopa_api/FespCdClient";
+// import { CONFIG, Configuration } from "./config";
+import { Configuration } from "./config";
+// import { NodoAttivaRPT, NodoVerificaRPT } from "./fixtures/nodoRPTResponses";
+// import * as FespCdClient from "./services/pagopa_api/FespCdClient";
 import { logger } from "./utils/logger";
 
 export async function newExpressApp(
@@ -20,6 +21,7 @@ export async function newExpressApp(
   app.use(express.urlencoded());
   app.use(bodyParserXml({}));
 
+  logger.info(`Path ${config.NODO_MOCK.ROUTES.PPT_NODO} ...`);
   // SOAP Server mock entrypoint
   app.post(config.NODO_MOCK.ROUTES.PPT_NODO, async (req, res) => {
     logger.info(`REQUEST ---------------------------------- start`);
@@ -27,114 +29,119 @@ export async function newExpressApp(
     logger.info(`REQUEST ---------------------------------- start`);
     logger.info(req.body);
     logger.info(`REQUEST ---------------------------------- stop`);
-    const soapRequest = req.body["soap:envelope"]["soap:body"][0];
+    const soapRequest = req.body["soapenv:envelope"]["soapenv:body"][0];
     // 2) The SOAP request is a NodoAttivaRPT request
-    if (soapRequest["ppt:nodoattivarpt"]) {
-      const nodoAttivaRPT = soapRequest["ppt:nodoattivarpt"][0];
-      const password = nodoAttivaRPT.password[0];
-      if (password !== config.PAGOPA_PROXY.PASSWORD) {
-        const nodoAttivaErrorResponse = NodoAttivaRPT({
-          esito: "KO",
-          fault: {
-            faultCode: "401",
-            faultString: "Invalid password dajeee",
-            id: "0",
-          },
-        });
-        return res
-          .status(nodoAttivaErrorResponse[0])
-          .send(nodoAttivaErrorResponse[1]);
-      }
-      const importoSingoloVersamento =
-        nodoAttivaRPT.datipagamentopsp[0].importosingoloversamento[0];
-      const codiceContestoPagamento = nodoAttivaRPT.codicecontestopagamento[0];
-      const nodoAttivaSuccessResponse = NodoAttivaRPT({
-        datiPagamento: { importoSingoloVersamento },
-        esito: "OK",
-      });
-      // Async call to PagoPa Proxy FespCd SOAP service
-      setTimeout(async () => {
-        const pagoPaProxyClient = new FespCdClient.FespCdClientAsync(
-          await FespCdClient.createFespCdClient({
-            endpoint: `${CONFIG.PAGOPA_PROXY.HOST}:${CONFIG.PAGOPA_PROXY.PORT}${CONFIG.PAGOPA_PROXY.WS_SERVICES.FESP_CD}`,
-            wsdl_options: {
-              timeout: 1000,
-            },
-          })
-        );
-        try {
-          await pagoPaProxyClient.cdInfoWisp({
-            codiceContestoPagamento,
-            // Fake paymentId
-            idPagamento: Math.random()
-              .toString(36)
-              .slice(2)
-              .toUpperCase(), // TODO: Check required format
-            identificativoDominio: "1" as (string &
-              IWithinRangeStringTag<1, 36>),
-            identificativoUnivocoVersamento:
-              // Fake paymentId
-              Math.random()
-                .toString(36)
-                .slice(2)
-                .toUpperCase() as (string & IWithinRangeStringTag<1, 36>), // TODO: check required format
-          });
-        } catch (err) {
-          logger.error(err);
-        }
-      }, 1000);
-      return res
-        .status(nodoAttivaSuccessResponse[0])
-        .send(nodoAttivaSuccessResponse[1]);
-    }
+    // if (soapRequest["ppt:nodoattivarpt"]) {
+    //   const nodoAttivaRPT = soapRequest["ppt:nodoattivarpt"][0];
+    //   const password = nodoAttivaRPT.password[0];
+    //   if (password !== config.PAGOPA_PROXY.PASSWORD) {
+    //     const nodoAttivaErrorResponse = NodoAttivaRPT({
+    //       esito: "KO",
+    //       fault: {
+    //         faultCode: "401",
+    //         faultString: "Invalid password dajeee",
+    //         id: "0",
+    //       },
+    //     });
+    //     return res
+    //       .status(nodoAttivaErrorResponse[0])
+    //       .send(nodoAttivaErrorResponse[1]);
+    //   }
+    //   const importoSingoloVersamento =
+    //     nodoAttivaRPT.datipagamentopsp[0].importosingoloversamento[0];
+    //   const codiceContestoPagamento = nodoAttivaRPT.codicecontestopagamento[0];
+    //   const nodoAttivaSuccessResponse = NodoAttivaRPT({
+    //     datiPagamento: { importoSingoloVersamento },
+    //     esito: "OK",
+    //   });
+    //   // Async call to PagoPa Proxy FespCd SOAP service
+    //   setTimeout(async () => {
+    //     const pagoPaProxyClient = new FespCdClient.FespCdClientAsync(
+    //       await FespCdClient.createFespCdClient({
+    //         endpoint: `${CONFIG.PAGOPA_PROXY.HOST}:${CONFIG.PAGOPA_PROXY.PORT}${CONFIG.PAGOPA_PROXY.WS_SERVICES.FESP_CD}`,
+    //         wsdl_options: {
+    //           timeout: 1000,
+    //         },
+    //       })
+    //     );
+    //     try {
+    //       await pagoPaProxyClient.cdInfoWisp({
+    //         codiceContestoPagamento,
+    //         // Fake paymentId
+    //         idPagamento: Math.random()
+    //           .toString(36)
+    //           .slice(2)
+    //           .toUpperCase(), // TODO: Check required format
+    //         identificativoDominio: "1" as (string &
+    //           IWithinRangeStringTag<1, 36>),
+    //         identificativoUnivocoVersamento:
+    //           // Fake paymentId
+    //           Math.random()
+    //             .toString(36)
+    //             .slice(2)
+    //             .toUpperCase() as (string & IWithinRangeStringTag<1, 36>), // TODO: check required format
+    //       });
+    //     } catch (err) {
+    //       logger.error(err);
+    //     }
+    //   }, 1000);
+    //   return res
+    //     .status(nodoAttivaSuccessResponse[0])
+    //     .send(nodoAttivaSuccessResponse[1]);
+    // }
     // 1) The SOAP request is a NodoVerificaRPT request
-    if (soapRequest["ppt:nodoverificarpt"]) {
-      const nodoVerificaRPT = soapRequest["ppt:nodoverificarpt"][0];
-      const password = nodoVerificaRPT.password[0];
-      // const cf = nodoVerificaRPT.codiceidrpt[0]["qrc:qrcode"]["qrc:cf"];
-      // const cf = nodoVerificaRPT.codiceidrpt[0]["qrc:qrcode"][0]["qrc:cf"][0];
-      logger.info(`REQUEST ---------------------------------- cf `);
-      // logger.info(cf);
-      // error #1 : Invalid password
-      if (password !== config.PAGOPA_PROXY.PASSWORD) {
-        const nodoVerificaErrorResponse = NodoVerificaRPT({
-          esito: "KO",
-          fault: {
-            faultCode: "401",
-            faultString: "Invalid password",
-            id: "0",
-          },
-        });
-        return res
-          .status(nodoVerificaErrorResponse[0])
-          .send(nodoVerificaErrorResponse[1]);
-      }
-      // error #2 : Payment already presetnt
-      // const cfHellJoke = new RegExp("^777*");
-      // if (cfHellJoke.test(cf)) {
-      //   const nodoVerificaErrorResponse = NodoVerificaRPT({
-      //     esito: "KO",
-      //     fault: {
-      //       faultCode: "PAA_PAGAMENTO_DUPLICATO",
-      //       faultString: "Invalid password dajeeee",
-      //       id: "0",
-      //     },
-      //   });
-      //   return res
-      //     .status(nodoVerificaErrorResponse[0])
-      //     .send(nodoVerificaErrorResponse[1]);
-      // }
+    // if (soapRequest["ppt:nodoverificarpt"]) {
+    //   const nodoVerificaRPT = soapRequest["ppt:nodoverificarpt"][0];
+    //   const password = nodoVerificaRPT.password[0];
+    //   // const cf = nodoVerificaRPT.codiceidrpt[0]["qrc:qrcode"]["qrc:cf"];
+    //   // const cf = nodoVerificaRPT.codiceidrpt[0]["qrc:qrcode"][0]["qrc:cf"][0];
+    //   logger.info(`REQUEST ---------------------------------- cf `);
+    //   // logger.info(cf);
+    //   // error #1 : Invalid password
+    //   if (password !== config.PAGOPA_PROXY.PASSWORD) {
+    //     const nodoVerificaErrorResponse = NodoVerificaRPT({
+    //       esito: "KO",
+    //       fault: {
+    //         faultCode: "401",
+    //         faultString: "Invalid password",
+    //         id: "0",
+    //       },
+    //     });
+    //     return res
+    //       .status(nodoVerificaErrorResponse[0])
+    //       .send(nodoVerificaErrorResponse[1]);
+    //   }
+    //   // error #2 : Payment already presetnt
+    //   // const cfHellJoke = new RegExp("^777*");
+    //   // if (cfHellJoke.test(cf)) {
+    //   //   const nodoVerificaErrorResponse = NodoVerificaRPT({
+    //   //     esito: "KO",
+    //   //     fault: {
+    //   //       faultCode: "PAA_PAGAMENTO_DUPLICATO",
+    //   //       faultString: "Invalid password dajeeee",
+    //   //       id: "0",
+    //   //     },
+    //   //   });
+    //   //   return res
+    //   //     .status(nodoVerificaErrorResponse[0])
+    //   //     .send(nodoVerificaErrorResponse[1]);
+    //   // }
 
-      const importoSingoloVersamento = "1.00";
-      const nodoVerificaSuccessResponse = NodoVerificaRPT({
-        datiPagamento: {
-          importoSingoloVersamento,
-        },
-        esito: "OK",
-      });
-      return res
-        .status(nodoVerificaSuccessResponse[0])
-        .send(nodoVerificaSuccessResponse[1]);
+    //   const importoSingoloVersamento = "1.00";
+    //   const nodoVerificaSuccessResponse = NodoVerificaRPT({
+    //     datiPagamento: {
+    //       importoSingoloVersamento,
+    //     },
+    //     esito: "OK",
+    //   });
+    //   return res
+    //     .status(nodoVerificaSuccessResponse[0])
+    //     .send(nodoVerificaSuccessResponse[1]);
+    // }
+
+    // 3) The SOAP request is a paVerifyPaymentNotice request
+    if (soapRequest["nod:paverifypaymentnoticereq"]) {
+      return res.status(200).send("dajeeeeeee");
     }
     // The SOAP Request not implemented
     res.status(404).send("Not found");
