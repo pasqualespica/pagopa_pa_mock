@@ -77,7 +77,7 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
             params.fiscalCodePA
               ? // tslint:disable-next-line: no-nested-template-literals
                 `<data>
-                    <creditorReferenceId>${params.creditorReferenceId}</creditorReferencecreditorReferenceId>
+                    <creditorReferenceId>${params.creditorReferenceId}</creditorReferenceId>
                     <paymentAmount>120.00</paymentAmount>
                     <dueDate>2021-07-31</dueDate>
                     <description>TARI/TEFA 2021</description>
@@ -101,7 +101,7 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                       <transfer>
                         <idTransfer>1</idTransfer>
                         <transferAmount>100.00</transferAmount>
-                        <fiscalCodePA>7777777777</fiscalCodePA>
+                        <fiscalCodePA>77777777777</fiscalCodePA>
                         <IBAN>${params.IBAN_1}</IBAN>
                         <remittanceInformation>TARI Comune EC_TE su bollettino</remittanceInformation>
                         <transferCategory>0101101IM</transferCategory>

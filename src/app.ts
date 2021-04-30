@@ -9,7 +9,7 @@ import {
 import { StTransferType_type_pafnEnum } from "./generated/paForNode_Service/stTransferType_type_pafn";
 import { logger } from "./utils/logger";
 
-const verifySoapRequest = "nod:paverifypaymentnoticereq";
+const verifySoapRequest = "pafn:paverifypaymentnoticereq";
 const activateSoapRequest = "pafn:pagetpaymentreq";
 
 const avviso1 = new RegExp("^30200.*");
