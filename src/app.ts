@@ -1,13 +1,22 @@
 import * as express from "express";
 import * as bodyParserXml from "express-xml-bodyparser";
-// import { IWithinRangeStringTag } from "italia-ts-commons/lib/strings";
 import * as morgan from "morgan";
-// import { CONFIG, Configuration } from "./config";
 import { Configuration } from "./config";
-// import { NodoAttivaRPT, NodoVerificaRPT } from "./fixtures/nodoRPTResponses";
-import { paVerifyPaymentNoticeRes } from "./fixtures/nodoRPTResponses";
-// import * as FespCdClient from "./services/pagopa_api/FespCdClient";
+import {
+  paGetPaymentRes,
+  paVerifyPaymentNoticeRes,
+} from "./fixtures/nodoNewMod3Responses";
+import { StTransferType_type_pafnEnum } from "./generated/paForNode_Service/stTransferType_type_pafn";
 import { logger } from "./utils/logger";
+
+const verifySoapRequest = "nod:paverifypaymentnoticereq";
+const activateSoapRequest = "pafn:pagetpaymentreq";
+
+const avviso1 = new RegExp("^30200.*");
+const avviso2 = new RegExp("^30201.*");
+const avviso3 = new RegExp("^30202.*");
+const avviso4 = new RegExp("^30203.*");
+// const avviso5 = new RegExp("^30101.*");
 
 export async function newExpressApp(
   config: Configuration
@@ -25,133 +34,128 @@ export async function newExpressApp(
   logger.info(`Path ${config.NODO_MOCK.ROUTES.PPT_NODO} ...`);
   // SOAP Server mock entrypoint
   app.post(config.NODO_MOCK.ROUTES.PPT_NODO, async (req, res) => {
-    logger.info(`REQUEST ---------------------------------- start`);
-    logger.info(req.url);
-    logger.info(`REQUEST ---------------------------------- start`);
+    logger.info(`rx REQUEST `);
     logger.info(req.body);
-    logger.info(`REQUEST ---------------------------------- stop`);
-    const soapRequest = req.body["soapenv:envelope"]["soapenv:body"][0];
-    // 2) The SOAP request is a NodoAttivaRPT request
-    // if (soapRequest["ppt:nodoattivarpt"]) {
-    //   const nodoAttivaRPT = soapRequest["ppt:nodoattivarpt"][0];
-    //   const password = nodoAttivaRPT.password[0];
-    //   if (password !== config.PAGOPA_PROXY.PASSWORD) {
-    //     const nodoAttivaErrorResponse = NodoAttivaRPT({
-    //       esito: "KO",
-    //       fault: {
-    //         faultCode: "401",
-    //         faultString: "Invalid password dajeee",
-    //         id: "0",
-    //       },
-    //     });
-    //     return res
-    //       .status(nodoAttivaErrorResponse[0])
-    //       .send(nodoAttivaErrorResponse[1]);
-    //   }
-    //   const importoSingoloVersamento =
-    //     nodoAttivaRPT.datipagamentopsp[0].importosingoloversamento[0];
-    //   const codiceContestoPagamento = nodoAttivaRPT.codicecontestopagamento[0];
-    //   const nodoAttivaSuccessResponse = NodoAttivaRPT({
-    //     datiPagamento: { importoSingoloVersamento },
-    //     esito: "OK",
-    //   });
-    //   // Async call to PagoPa Proxy FespCd SOAP service
-    //   setTimeout(async () => {
-    //     const pagoPaProxyClient = new FespCdClient.FespCdClientAsync(
-    //       await FespCdClient.createFespCdClient({
-    //         endpoint: `${CONFIG.PAGOPA_PROXY.HOST}:${CONFIG.PAGOPA_PROXY.PORT}${CONFIG.PAGOPA_PROXY.WS_SERVICES.FESP_CD}`,
-    //         wsdl_options: {
-    //           timeout: 1000,
-    //         },
-    //       })
-    //     );
-    //     try {
-    //       await pagoPaProxyClient.cdInfoWisp({
-    //         codiceContestoPagamento,
-    //         // Fake paymentId
-    //         idPagamento: Math.random()
-    //           .toString(36)
-    //           .slice(2)
-    //           .toUpperCase(), // TODO: Check required format
-    //         identificativoDominio: "1" as (string &
-    //           IWithinRangeStringTag<1, 36>),
-    //         identificativoUnivocoVersamento:
-    //           // Fake paymentId
-    //           Math.random()
-    //             .toString(36)
-    //             .slice(2)
-    //             .toUpperCase() as (string & IWithinRangeStringTag<1, 36>), // TODO: check required format
-    //       });
-    //     } catch (err) {
-    //       logger.error(err);
-    //     }
-    //   }, 1000);
-    //   return res
-    //     .status(nodoAttivaSuccessResponse[0])
-    //     .send(nodoAttivaSuccessResponse[1]);
-    // }
-    // 1) The SOAP request is a NodoVerificaRPT request
-    // if (soapRequest["ppt:nodoverificarpt"]) {
-    //   const nodoVerificaRPT = soapRequest["ppt:nodoverificarpt"][0];
-    //   const password = nodoVerificaRPT.password[0];
-    //   // const cf = nodoVerificaRPT.codiceidrpt[0]["qrc:qrcode"]["qrc:cf"];
-    //   // const cf = nodoVerificaRPT.codiceidrpt[0]["qrc:qrcode"][0]["qrc:cf"][0];
-    //   logger.info(`REQUEST ---------------------------------- cf `);
-    //   // logger.info(cf);
-    //   // error #1 : Invalid password
-    //   if (password !== config.PAGOPA_PROXY.PASSWORD) {
-    //     const nodoVerificaErrorResponse = NodoVerificaRPT({
-    //       esito: "KO",
-    //       fault: {
-    //         faultCode: "401",
-    //         faultString: "Invalid password",
-    //         id: "0",
-    //       },
-    //     });
-    //     return res
-    //       .status(nodoVerificaErrorResponse[0])
-    //       .send(nodoVerificaErrorResponse[1]);
-    //   }
-    //   // error #2 : Payment already presetnt
-    //   // const cfHellJoke = new RegExp("^777*");
-    //   // if (cfHellJoke.test(cf)) {
-    //   //   const nodoVerificaErrorResponse = NodoVerificaRPT({
-    //   //     esito: "KO",
-    //   //     fault: {
-    //   //       faultCode: "PAA_PAGAMENTO_DUPLICATO",
-    //   //       faultString: "Invalid password dajeeee",
-    //   //       id: "0",
-    //   //     },
-    //   //   });
-    //   //   return res
-    //   //     .status(nodoVerificaErrorResponse[0])
-    //   //     .send(nodoVerificaErrorResponse[1]);
-    //   // }
+    try {
+      const soapRequest = req.body["soapenv:envelope"]["soapenv:body"][0];
+      // 1. paVerifyPaymentNotice
+      if (soapRequest[verifySoapRequest]) {
+        const paVerifyPaymentNotice = soapRequest[verifySoapRequest][0];
+        const fiscalcode = paVerifyPaymentNotice.qrcode[0].fiscalcode;
+        const noticenumber = paVerifyPaymentNotice.qrcode[0].noticenumber;
+        const isValidNotice =
+          avviso1.test(noticenumber) ||
+          avviso2.test(noticenumber) ||
+          avviso3.test(noticenumber) ||
+          avviso4.test(noticenumber);
 
-    //   const importoSingoloVersamento = "1.00";
-    //   const nodoVerificaSuccessResponse = NodoVerificaRPT({
-    //     datiPagamento: {
-    //       importoSingoloVersamento,
-    //     },
-    //     esito: "OK",
-    //   });
-    //   return res
-    //     .status(nodoVerificaSuccessResponse[0])
-    //     .send(nodoVerificaSuccessResponse[1]);
-    // }
+        if (!isValidNotice) {
+          // error case
+          const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
+            outcome: "KO",
+            fault: {
+              faultCode: "PAA_PAGAMENTO_SCONOSCIUTO",
+              faultString: "numero avviso devo inziare con 3020[0|1|2|3]",
+              id: "PAGOPA_MOCK",
+            },
+          });
 
-    // 3) The SOAP request is a paVerifyPaymentNotice request
+          return res
+            .status(paVerifyPaymentNoticeResponse[0])
+            .send(paVerifyPaymentNoticeResponse[1]);
+        } else {
+          // happy case
+          const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
+            outcome: "OK",
+            fiscalCodePA: fiscalcode,
+            transferType: avviso1.test(noticenumber)
+              ? StTransferType_type_pafnEnum.POSTAL
+              : undefined,
+          });
 
-    const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
-      esito: "OK",
-    });
-    if (soapRequest["nod:paverifypaymentnoticereq"]) {
-      return res
-        .status(paVerifyPaymentNoticeResponse[0])
-        .send(paVerifyPaymentNoticeResponse[1]);
+          return res
+            .status(paVerifyPaymentNoticeResponse[0])
+            .send(paVerifyPaymentNoticeResponse[1]);
+        }
+      }
+
+      // 2. paGetPayment
+      if (soapRequest[activateSoapRequest]) {
+        const paGetPayment = soapRequest[activateSoapRequest][0];
+
+        const fiscalcode = paGetPayment.qrcode[0].fiscalcode;
+        const noticenumber: string = paGetPayment.qrcode[0].noticenumber;
+        const creditorReferenceId = noticenumber[0].substring(1);
+        // const amount = paGetPayment.amount;
+        const isValidNotice =
+          avviso1.test(noticenumber) ||
+          avviso2.test(noticenumber) ||
+          avviso3.test(noticenumber) ||
+          avviso4.test(noticenumber);
+
+        if (!isValidNotice) {
+          // error case
+          const paGetPaymentResponse = paGetPaymentRes({
+            outcome: "KO",
+            fault: {
+              faultCode: "PAA_PAGAMENTO_SCONOSCIUTO",
+              faultString: "numero avviso devo inziare con 3020[0|1|2|3]",
+              id: "PAGOPA_MOCK",
+            },
+          });
+
+          return res
+            .status(paGetPaymentResponse[0])
+            .send(paGetPaymentResponse[1]);
+        } else {
+          // happy case
+
+          // retrive 0,1,2,3 from noticenumber
+          const idIbanAvviso: number = +noticenumber[0].substring(4, 5);
+          let iban1;
+          let iban2;
+
+          switch (idIbanAvviso) {
+            case 0:
+              iban1 = "IT57N0760114800000011050036";
+              iban2 = "IT21Q0760101600000000546200";
+              break;
+            case 1:
+              iban1 = "IT57N0760114800000011050036";
+              iban2 = "IT15V0306901783100000300001";
+              break;
+            case 2:
+              iban1 = "IT30N0103076271000001823603";
+              iban2 = "IT21Q0760101600000000546200";
+              break;
+            case 3:
+              iban1 = "IT30N0103076271000001823603";
+              iban2 = "IT15V0306901783100000300001";
+              break;
+            default:
+              // The SOAP Request not implemented
+              res.status(404).send("Not found iban");
+          }
+
+          const paGetPaymentResponse = paGetPaymentRes({
+            outcome: "OK",
+            fiscalCodePA: fiscalcode,
+            creditorReferenceId,
+            IBAN_1: iban1,
+            IBAN_2: iban2,
+          });
+          return res
+            .status(paGetPaymentResponse[0])
+            .send(paGetPaymentResponse[1]);
+        }
+      }
+
+      // The SOAP Request not implemented
+      res.status(404).send("Not found");
+    } catch (error) {
+      // The SOAP Request isnt' correct
+      res.status(500).send("Internal Server Error :( ");
     }
-    // The SOAP Request not implemented
-    res.status(404).send("Not found");
   });
   return app;
 }

@@ -82,39 +82,3 @@ export const NodoVerificaRPT = (params: INodoRPTRequest): MockResponse => [
 </s:Body>
 </s:Envelope>`,
 ];
-
-export const paVerifyPaymentNoticeRes = (
-  params: INodoRPTRequest
-): MockResponse => [
-  200,
-  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
-  <soapenv:Header />
-  <soapenv:Body>
-    <paf:paVerifyPaymentNoticeRes>
-      <outcome>OK</outcome>
-      <!--Optional:-->
-      <paymentList>
-        <!--1 to 5 repetitions:-->
-        <paymentOptionDescription>
-          <amount>100.00</amount>
-          <options>EQ</options>
-          <!--Optional:-->
-          <dueDate>2020-01-01</dueDate>
-          <!--Optional:-->
-          <detailDescription>?</detailDescription>
-          <!--Optional:-->
-          <transferType>POSTAL</transferType>
-        </paymentOptionDescription>
-      </paymentList>
-      <!--Optional:-->
-      <paymentDescription>?</paymentDescription>
-      <!--Optional:-->
-      <fiscalCodePA>12345678900</fiscalCodePA>
-      <!--Optional:-->
-      <companyName>?</companyName>
-      <!--Optional:-->
-      <officeName>?</officeName>
-    </paf:paVerifyPaymentNoticeRes>
-  </soapenv:Body>
-</soapenv:Envelope>`,
-];

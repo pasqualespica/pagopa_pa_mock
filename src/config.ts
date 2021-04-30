@@ -9,6 +9,9 @@ import { stText35_type_pay_i } from "./generated/PagamentiTelematiciPspNodoservi
 
 const localhost = "http://localhost";
 
+// Apache configuration proxy
+// http://localhost:8089/mockPagamentiTelematiciCCP
+
 export const CONFIG = {
   // The log level used for Winston logger (error, info, debug)
   WINSTON_LOG_LEVEL: process.env.WINSTON_LOG_LEVEL || "debug",
@@ -19,14 +22,11 @@ export const CONFIG = {
   // Used to expose services
   NODO_MOCK: {
     HOST: process.env.PAGOPA_NODO_HOST || localhost,
-    PORT: process.env.PORT || 3000,
-
+    PORT: process.env.PORT || 8089,
     // SHA256 client certificate fingerprint (without `:` separators)
-    CLIENT_CERTIFICATE_FINGERPRINT:
-      process.env.PAGOPAPROXY_CLIENT_CERTIFICATE_FINGERPRINT,
     ROUTES: {
-      PPT_NODO: "/webservices/pof/PagamentiTelematiciPspNodoservice"
-    }
+      PPT_NODO: "/mockPagamentiTelematiciCCP",
+    },
   },
 
   // PagoPA Proxy Configuration
@@ -46,20 +46,20 @@ export const CONFIG = {
       IDENTIFICATIVO_CANALE_PAGAMENTO:
         process.env.PAGOPA_ID_CANALE_PAGAMENTO || "1",
       IDENTIFICATIVO_INTERMEDIARIO_PSP: process.env.PAGOPA_ID_INT_PSP || "1",
-      IDENTIFICATIVO_PSP: process.env.PAGOPA_ID_PSP || "1"
+      IDENTIFICATIVO_PSP: process.env.PAGOPA_ID_PSP || "1",
     },
     PORT: process.env.PAGOPA_PROXY_PORT || 3001,
     WS_SERVICES: {
-      FESP_CD: process.env.PAGOPA_WS_URI || "/FespCdService"
-    }
-  }
+      FESP_CD: process.env.PAGOPA_WS_URI || "/FespCdService",
+    },
+  },
 };
 
 // Configuration validator - Define configuration types and interfaces
 const ServerConfiguration = t.interface({
   HOST: NonEmptyString,
   // We allow t.string to use socket pipe address in Azure App Services
-  PORT: t.any
+  PORT: t.any,
 });
 export type ServerConfiguration = t.TypeOf<typeof ServerConfiguration>;
 
@@ -67,19 +67,19 @@ const NodoMockConfig = t.intersection([
   ServerConfiguration,
   t.interface({
     ROUTES: t.interface({
-      PPT_NODO: NonEmptyString
-    })
+      PPT_NODO: NonEmptyString,
+    }),
   }),
   t.partial({
-    CLIENT_CERTIFICATE_FINGERPRINT: NonEmptyString
-  })
+    CLIENT_CERTIFICATE_FINGERPRINT: NonEmptyString,
+  }),
 ]);
 export type NodoMockConfig = t.TypeOf<typeof NodoMockConfig>;
 
 export const PagoPAProxyConfig = t.intersection([
   ServerConfiguration,
   t.interface({
-    PASSWORD: stPassword_type_ppt
+    PASSWORD: stPassword_type_ppt,
   }),
   t.interface({
     CLIENT_TIMEOUT_MSEC: t.number,
@@ -87,25 +87,25 @@ export const PagoPAProxyConfig = t.intersection([
       IDENTIFICATIVO_CANALE: stText35_type_pay_i,
       IDENTIFICATIVO_CANALE_PAGAMENTO: stText35_type_pay_i,
       IDENTIFICATIVO_INTERMEDIARIO_PSP: stText35_type_pay_i,
-      IDENTIFICATIVO_PSP: stText35_type_pay_i
+      IDENTIFICATIVO_PSP: stText35_type_pay_i,
     }),
     WS_SERVICES: t.interface({
-      FESP_CD: NonEmptyString
-    })
+      FESP_CD: NonEmptyString,
+    }),
   }),
   t.partial({
     CERT: NonEmptyString,
     KEY: NonEmptyString,
 
-    HOST_HEADER: t.string
-  })
+    HOST_HEADER: t.string,
+  }),
 ]);
 export type PagoPAProxyConfig = t.TypeOf<typeof PagoPAProxyConfig>;
 
 export const WinstonLogLevel = t.keyof({
   debug: 4,
   error: 0,
-  info: 2
+  info: 2,
 });
 export type WinstonLogLevel = t.TypeOf<typeof WinstonLogLevel>;
 
@@ -113,14 +113,14 @@ export const RedisConfig = t.intersection([
   ServerConfiguration,
   t.interface({
     PASSWORD: t.string,
-    USE_CLUSTER: t.boolean
-  })
+    USE_CLUSTER: t.boolean,
+  }),
 ]);
 export type RedisConfig = t.TypeOf<typeof RedisConfig>;
 
 export const Configuration = t.interface({
   NODO_MOCK: NodoMockConfig,
   PAGOPA_PROXY: PagoPAProxyConfig,
-  WINSTON_LOG_LEVEL: WinstonLogLevel
+  WINSTON_LOG_LEVEL: WinstonLogLevel,
 });
 export type Configuration = t.TypeOf<typeof Configuration>;
