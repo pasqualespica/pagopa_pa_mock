@@ -35,7 +35,7 @@ export async function newExpressApp(
   // SOAP Server mock entrypoint
   app.post(config.NODO_MOCK.ROUTES.PPT_NODO, async (req, res) => {
     logger.info(`>>> rx REQUEST :`);
-    logger.info(req.body);
+    logger.info(JSON.stringify(req.body));
     try {
       const soapRequest = req.body["soapenv:envelope"]["soapenv:body"][0];
       // 1. paVerifyPaymentNotice
