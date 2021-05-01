@@ -34,7 +34,7 @@ export async function newExpressApp(
   logger.info(`Path ${config.NODO_MOCK.ROUTES.PPT_NODO} ...`);
   // SOAP Server mock entrypoint
   app.post(config.NODO_MOCK.ROUTES.PPT_NODO, async (req, res) => {
-    logger.info(`rx REQUEST `);
+    logger.info(`>>> rx REQUEST :`);
     logger.info(req.body);
     try {
       const soapRequest = req.body["soapenv:envelope"]["soapenv:body"][0];
@@ -72,6 +72,11 @@ export async function newExpressApp(
               ? StTransferType_type_pafnEnum.POSTAL
               : undefined,
           });
+
+          logger.info(
+            `>>> tx RESPONSE [${paVerifyPaymentNoticeResponse[0]}]: `
+          );
+          logger.info(paVerifyPaymentNoticeResponse[1]);
 
           return res
             .status(paVerifyPaymentNoticeResponse[0])
@@ -144,6 +149,10 @@ export async function newExpressApp(
             IBAN_1: iban1,
             IBAN_2: iban2,
           });
+
+          logger.info(`>>> tx RESPONSE [${paGetPaymentResponse[0]}]: `);
+          logger.info(paGetPaymentResponse[1]);
+
           return res
             .status(paGetPaymentResponse[0])
             .send(paGetPaymentResponse[1]);
