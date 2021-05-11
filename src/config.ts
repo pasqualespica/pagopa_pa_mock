@@ -122,5 +122,6 @@ export const Configuration = t.interface({
   NODO_MOCK: NodoMockConfig,
   PAGOPA_PROXY: PagoPAProxyConfig,
   WINSTON_LOG_LEVEL: WinstonLogLevel,
+  // tslint:disable-next-line: object-literal-sort-keys
 });
 export type Configuration = t.TypeOf<typeof Configuration>;

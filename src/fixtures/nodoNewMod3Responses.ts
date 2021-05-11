@@ -24,6 +24,10 @@ interface IActivateRequest {
   IBAN_2?: string;
 }
 
+interface IRTRequest {
+  outcome: "OK" | "KO";
+}
+
 export const paVerifyPaymentNoticeRes = (
   params: IVerifyRequest
 ): MockResponse => [
@@ -129,6 +133,18 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
               : ""
           }
       </paf:paGetPaymentRes>
+    </soapenv:Body>
+  </soapenv:Envelope>`,
+];
+
+export const paSendRtRes = (params: IRTRequest): MockResponse => [
+  200,
+  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <paf:paSendRTRes>
+          <outcome>${params.outcome}</outcome>
+      </paf:paSendRTRes>
     </soapenv:Body>
   </soapenv:Envelope>`,
 ];
