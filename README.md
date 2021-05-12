@@ -44,7 +44,7 @@ With this mock are modelled both multibeneficiary notice (comprehensive of TARI 
 
 ## Configurations
 
-Both EC have gli enti have at their disposla a bank IBAN and a postal IBAN.
+Both EC have at their disposl a bank IBAN and a postal IBAN.
 Based on notice number the mock will reply with a certain configuration of the tribute.
 
 
