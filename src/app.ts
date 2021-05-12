@@ -317,10 +317,12 @@ export async function newExpressApp(
       }
 
       // The SOAP Request not implemented
+      logger.info(`The SOAP Request ${soapRequest} not implemented`);
       res.status(404).send("Not found");
       // tslint:disable-next-line: prettier
     } catch (error) {
       // The SOAP Request isnt' correct
+      logger.info(`The SOAP Request isnt' correct`);
       res.status(500).send("Internal Server Error :( ");
     }
     // tslint:disable-next-line: no-empty
