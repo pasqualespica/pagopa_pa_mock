@@ -14,7 +14,7 @@ A mock implementation of PA pagoPA service
 
 ## Glossary
 
-| Alisa | Description | 
+| Acronym | Description | 
 | -------- | ----------- | 
 | EC or PA        | Public Admninistration  | 
 | CCPost          | Postal account          | 
