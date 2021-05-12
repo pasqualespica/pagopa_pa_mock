@@ -45,7 +45,7 @@ export const paVerifyPaymentNoticeRes = (
           ? // tslint:disable-next-line: no-nested-template-literals
             `<paymentList>
         <paymentOptionDescription>
-          <amount>${params.amount}</amount>
+          <amount>${params.amount?.toFixed(2)}</amount>
           <options>EQ</options>
           <dueDate>2021-07-31</dueDate>
           <detailDescription>pagamentoTest</detailDescription>
@@ -74,8 +74,8 @@ export const paVerifyPaymentNoticeRes = (
 ];
 
 export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
-  200,
-  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
+         200,
+         `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
     <soapenv:Header/>
     <soapenv:Body>
         <paf:paGetPaymentRes>
@@ -87,7 +87,7 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                     <creditorReferenceId>${
                       params.creditorReferenceId
                     }</creditorReferenceId>
-                    <paymentAmount>${params.amount}</paymentAmount>
+                    <paymentAmount>${params.amount?.toFixed(2)}</paymentAmount>
                     <dueDate>2021-07-31</dueDate>
                     <description>${params.description}</description>
                     <companyName>company PA</companyName>
@@ -146,7 +146,7 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
       </paf:paGetPaymentRes>
     </soapenv:Body>
   </soapenv:Envelope>`,
-];
+       ];
 
 export const paSendRtRes = (params: IRTRequest): MockResponse => [
   200,
