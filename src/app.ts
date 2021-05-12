@@ -317,7 +317,9 @@ export async function newExpressApp(
       }
 
       // The SOAP Request not implemented
-      logger.info(`The SOAP Request ${soapRequest} not implemented`);
+      logger.info(
+        `The SOAP Request ${JSON.stringify(soapRequest)} not implemented`
+      );
       res.status(404).send("Not found");
       // tslint:disable-next-line: prettier
     } catch (error) {
