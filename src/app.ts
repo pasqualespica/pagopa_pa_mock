@@ -3,6 +3,7 @@ import * as bodyParserXml from "express-xml-bodyparser";
 import * as morgan from "morgan";
 import { Configuration } from "./config";
 import {
+  MockResponse,
   paGetPaymentRes,
   paSendRtRes,
   paVerifyPaymentNoticeRes,
@@ -17,20 +18,39 @@ import {
 } from "./utils/helper";
 import { logger } from "./utils/logger";
 
+const faultId = "77777777777";
+
+const CCPostPrimaryEC = "IT57N0760114800000011050036";
+const CCBankPrimaryEC = "IT30N0103076271000001823603";
+const CCPostSecondaryEC = "IT21Q0760101600000000546200";
+const CCBankSecondaryEC = "IT15V0306901783100000300001";
+
 const verifySoapRequest = "pafn:paverifypaymentnoticereq";
 const activateSoapRequest = "pafn:pagetpaymentreq";
 const sentReceipt = "pafn:pasendrtreq";
 
-const avviso1 = new RegExp("^30200.*");
-const avviso2 = new RegExp("^30201.*");
-const avviso3 = new RegExp("^30202.*");
-const avviso4 = new RegExp("^30203.*");
-const avvisoScaduto = new RegExp("^30299.*");
-// const avviso5 = new RegExp("^30101.*");
+const avviso1 = new RegExp("^30200.*"); // CCPost + CCPost
+const avviso2 = new RegExp("^30201.*"); // CCPost + CCBank
+const avviso3 = new RegExp("^30202.*"); // CCBank + CCPost
+const avviso4 = new RegExp("^30203.*"); // CCBank + CCBank
+const avviso5 = new RegExp("^30204.*"); // CCPost - Monobeneficiario
+const avviso6 = new RegExp("^30205.*"); // CCBank - Monobeneficiario
+const avvisoScaduto = new RegExp("^30299.*"); // PAA_PAGAMENTO_SCADUTO
+
+const amount1 = 100.0;
+const amount2 = 20.0;
+
+const descriptionAll = "TARI/TEFA 2021";
+const descriptionMono = "TARI 2021";
+
+function log_event_tx(resp: MockResponse) {
+  logger.info(`>>> tx RESPONSE [${resp[0]}]: `);
+  logger.info(resp[1]);
+}
 
 export async function newExpressApp(
   config: Configuration,
-  db?: Map<string, POSITIONS_STATUS>
+  db: Map<string, POSITIONS_STATUS>
 ): Promise<Express.Application> {
   const app = express();
   app.set("port", config.NODO_MOCK.PORT);
@@ -58,7 +78,9 @@ export async function newExpressApp(
           avviso1.test(noticenumber) ||
           avviso2.test(noticenumber) ||
           avviso3.test(noticenumber) ||
-          avviso4.test(noticenumber);
+          avviso4.test(noticenumber) ||
+          avviso5.test(noticenumber) ||
+          avviso6.test(noticenumber);
         const isExpiredNotice = avvisoScaduto.test(noticenumber);
 
         if (!isValidNotice && !isExpiredNotice) {
@@ -68,15 +90,11 @@ export async function newExpressApp(
             fault: {
               faultCode: PAA_PAGAMENTO_SCONOSCIUTO.value,
               faultString: "numero avviso devo inziare con 3020[0|1|2|3]",
-              id: "PAGOPA_MOCK",
+              id: faultId,
             },
           });
 
-          logger.info(
-            `>>> tx RESPONSE [${paVerifyPaymentNoticeResponse[0]}]: `
-          );
-          logger.info(paVerifyPaymentNoticeResponse[1]);
-
+          log_event_tx(paVerifyPaymentNoticeResponse);
           return res
             .status(paVerifyPaymentNoticeResponse[0])
             .send(paVerifyPaymentNoticeResponse[1]);
@@ -87,37 +105,34 @@ export async function newExpressApp(
             fault: {
               faultCode: PAA_PAGAMENTO_SCADUTO.value,
               faultString: `il numero avviso ${noticenumber} e' scaduto`,
-              id: "PAGOPA_MOCK",
+              id: faultId,
             },
           });
 
-          logger.info(
-            `>>> tx RESPONSE [${paVerifyPaymentNoticeResponse[0]}]: `
-          );
-          logger.info(paVerifyPaymentNoticeResponse[1]);
-          
+          log_event_tx(paVerifyPaymentNoticeResponse);
           return res
             .status(paVerifyPaymentNoticeResponse[0])
             .send(paVerifyPaymentNoticeResponse[1]);
         } else {
-          const b = db?.get(noticenumber[0] as string) as POSITIONS_STATUS; 
+          const b = db.get(noticenumber[0]);
           if (b) {
             // già esiste
             // error case PAA_PAGAMENTO_IN_CORSO
             const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
               outcome: "KO",
               fault: {
-                faultCode: ( b === POSITIONS_STATUS.IN_PROGRESS ? PAA_PAGAMENTO_IN_CORSO.value : b === POSITIONS_STATUS.CLOSE ? PAA_PAGAMENTO_DUPLICATO.value : "_UNDEFINE_"),
+                faultCode:
+                  b === POSITIONS_STATUS.IN_PROGRESS
+                    ? PAA_PAGAMENTO_IN_CORSO.value
+                    : b === POSITIONS_STATUS.CLOSE
+                    ? PAA_PAGAMENTO_DUPLICATO.value
+                    : "_UNDEFINE_",
                 faultString: `Errore ${noticenumber}`,
-                id: "PAGOPA_MOCK",
+                id: faultId,
               },
             });
 
-            logger.info(
-              `>>> tx RESPONSE [${paVerifyPaymentNoticeResponse[0]}]: `
-            );
-            logger.info(paVerifyPaymentNoticeResponse[1]);
-
+            log_event_tx(paVerifyPaymentNoticeResponse);
             return res
               .status(paVerifyPaymentNoticeResponse[0])
               .send(paVerifyPaymentNoticeResponse[1]);
@@ -126,16 +141,17 @@ export async function newExpressApp(
             const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
               outcome: "OK",
               fiscalCodePA: fiscalcode,
-              transferType: avviso1.test(noticenumber)
-                ? StTransferType_type_pafnEnum.POSTAL
-                : undefined,
+              transferType:
+                avviso1.test(noticenumber) || avviso5.test(noticenumber)
+                  ? StTransferType_type_pafnEnum.POSTAL
+                  : undefined,
+              amount:
+                avviso5.test(noticenumber) || avviso6.test(noticenumber)
+                  ? amount1
+                  : amount1 + amount2,
             });
 
-            logger.info(
-              `>>> tx RESPONSE [${paVerifyPaymentNoticeResponse[0]}]: `
-            );
-            logger.info(paVerifyPaymentNoticeResponse[1]);
-
+            log_event_tx(paVerifyPaymentNoticeResponse);
             return res
               .status(paVerifyPaymentNoticeResponse[0])
               .send(paVerifyPaymentNoticeResponse[1]);
@@ -155,7 +171,9 @@ export async function newExpressApp(
           avviso1.test(noticenumber) ||
           avviso2.test(noticenumber) ||
           avviso3.test(noticenumber) ||
-          avviso4.test(noticenumber);
+          avviso4.test(noticenumber) ||
+          avviso5.test(noticenumber) ||
+          avviso6.test(noticenumber);
         const isExpiredNotice = avvisoScaduto.test(noticenumber);
 
         if (!isValidNotice && !isExpiredNotice) {
@@ -165,13 +183,11 @@ export async function newExpressApp(
             fault: {
               faultCode: PAA_PAGAMENTO_SCONOSCIUTO.value,
               faultString: "numero avviso devo inziare con 3020[0|1|2|3]",
-              id: "PAGOPA_MOCK",
+              id: faultId,
             },
           });
 
-          logger.info(`>>> tx RESPONSE [${paGetPaymentResponse[0]}]: `);
-          logger.info(paGetPaymentResponse[1]);
-
+          log_event_tx(paGetPaymentResponse);
           return res
             .status(paGetPaymentResponse[0])
             .send(paGetPaymentResponse[1]);
@@ -182,63 +198,76 @@ export async function newExpressApp(
             fault: {
               faultCode: PAA_PAGAMENTO_SCADUTO.value,
               faultString: `il numero avviso ${noticenumber} e' scaduto`,
-              id: "PAGOPA_MOCK",
+              id: faultId,
             },
           });
 
-          logger.info(`>>> tx RESPONSE [${paGetPaymentResponse[0]}]: `);
-          logger.info(paGetPaymentResponse[1]);
-
+          log_event_tx(paGetPaymentResponse);
           return res
             .status(paGetPaymentResponse[0])
             .send(paGetPaymentResponse[1]);
         } else {
-          const b = db?.get(noticenumber[0] as string) as POSITIONS_STATUS; 
+          const b = db.get(noticenumber[0]);
           if (b) {
             // già esiste
             // error case PAA_PAGAMENTO_IN_CORSO
             const paGetPaymentResponse = paGetPaymentRes({
               outcome: "KO",
               fault: {
-                faultCode: ( b === POSITIONS_STATUS.IN_PROGRESS ? PAA_PAGAMENTO_IN_CORSO.value : b === POSITIONS_STATUS.CLOSE ? PAA_PAGAMENTO_DUPLICATO.value : "_UNDEFINE_"),
+                faultCode:
+                  b === POSITIONS_STATUS.IN_PROGRESS
+                    ? PAA_PAGAMENTO_IN_CORSO.value
+                    : b === POSITIONS_STATUS.CLOSE
+                    ? PAA_PAGAMENTO_DUPLICATO.value
+                    : "_UNDEFINE_",
                 faultString: `Errore ${noticenumber}`,
-                id: "PAGOPA_MOCK",
+                id: faultId,
               },
             });
 
-            logger.info(`>>> tx RESPONSE [${paGetPaymentResponse[0]}]: `);
-            logger.info(paGetPaymentResponse[1]);
-
+            log_event_tx(paGetPaymentResponse);
             return res
               .status(paGetPaymentResponse[0])
               .send(paGetPaymentResponse[1]);
-
           } else {
             // non esiste - la blocco
-            db?.set(noticenumber[0] as string, POSITIONS_STATUS.CLOSE);
+            db.set(noticenumber[0], POSITIONS_STATUS.CLOSE);
             // happy case
 
             // retrive 0,1,2,3 from noticenumber
             const idIbanAvviso: number = +noticenumber[0].substring(4, 5);
             let iban1;
             let iban2;
+            let remittanceInformation1Bollettino = "";
+            let remittanceInformation2Bollettino = "";
 
             switch (idIbanAvviso) {
-              case 0:
-                iban1 = "IT57N0760114800000011050036";
-                iban2 = "IT21Q0760101600000000546200";
+              case 0: // CCPost + CCPost
+                iban1 = CCPostPrimaryEC;
+                iban2 = CCPostSecondaryEC;
+                remittanceInformation1Bollettino = " su bollettino";
+                remittanceInformation2Bollettino = " su bollettino";
                 break;
-              case 1:
-                iban1 = "IT57N0760114800000011050036";
-                iban2 = "IT15V0306901783100000300001";
+              case 1: // CCPost + CCBank
+                iban1 = CCPostPrimaryEC;
+                iban2 = CCBankSecondaryEC;
+                remittanceInformation1Bollettino = " su bollettino";
                 break;
-              case 2:
-                iban1 = "IT30N0103076271000001823603";
-                iban2 = "IT21Q0760101600000000546200";
+              case 2: // CCBank + CCPost
+                iban1 = CCBankPrimaryEC;
+                iban2 = CCPostSecondaryEC;
+                remittanceInformation2Bollettino = " su bollettino";
                 break;
-              case 3:
-                iban1 = "IT30N0103076271000001823603";
-                iban2 = "IT15V0306901783100000300001";
+              case 3: // CCBank + CCBank
+                iban1 = CCBankPrimaryEC;
+                iban2 = CCBankSecondaryEC;
+                break;
+              case 4: //CCPost - Monobeneficiario
+                iban1 = CCPostPrimaryEC;
+                remittanceInformation1Bollettino = " su bollettino";
+                break;
+              case 5: //CCBank - Monobeneficiario
+                iban1 = CCBankPrimaryEC;
                 break;
               default:
                 // The SOAP Request not implemented
@@ -247,20 +276,26 @@ export async function newExpressApp(
 
             const paGetPaymentResponse = paGetPaymentRes({
               outcome: "OK",
+              amount:
+                avviso5.test(noticenumber) || avviso6.test(noticenumber)
+                  ? amount1
+                  : amount1 + amount2,
+              description:
+                avviso5.test(noticenumber) || avviso6.test(noticenumber)
+                  ? descriptionMono
+                  : descriptionAll,
               fiscalCodePA: fiscalcode,
               creditorReferenceId,
               IBAN_1: iban1,
               IBAN_2: iban2,
+              remittanceInformation1Bollettino,
+              remittanceInformation2Bollettino,
             });
 
-            logger.info(`>>> tx RESPONSE [${paGetPaymentResponse[0]}]: `);
-            logger.info(paGetPaymentResponse[1]);
-
+            log_event_tx(paGetPaymentResponse);
             return res
               .status(paGetPaymentResponse[0])
               .send(paGetPaymentResponse[1]);
-
-
           }
         }
       }
@@ -271,19 +306,14 @@ export async function newExpressApp(
         const iuv = paSendRT.receipt[0].creditorreferenceid[0];
 
         // libero la posizione - cancello
-        db?.delete(iuv);
+        db.delete(iuv);
 
         const paSendRTResponse = paSendRtRes({
           outcome: "OK",
         });
-        
-        logger.info(`>>> tx RESPONSE [${paSendRTResponse[0]}]: `);
-        logger.info(paSendRTResponse[1]);
 
-        return res
-          .status(paSendRTResponse[0])
-          .send(paSendRTResponse[1]);
-
+        log_event_tx(paSendRTResponse);
+        return res.status(paSendRTResponse[0]).send(paSendRTResponse[1]);
       }
 
       // The SOAP Request not implemented

@@ -1,16 +1,16 @@
 import { stAmount_type_pafn } from "../generated/paForNode_Service/stAmount_type_pafn";
 import { stFiscalCodePA_type_pafn } from "../generated/paForNode_Service/stFiscalCodePA_type_pafn";
-// import { stIBAN_type_pafn } from "../generated/paForNode_Service/stIBAN_type_pafn";
 import { stTransferType_type_pafn } from "../generated/paForNode_Service/stTransferType_type_pafn";
 import { faultBean_type_ppt } from "../generated/PagamentiTelematiciPspNodoservice/faultBean_type_ppt";
 
-type MockResponse = readonly [number, string];
+export type MockResponse = readonly [number, string];
 
 interface IVerifyRequest {
   outcome: "OK" | "KO";
   fiscalCodePA?: stFiscalCodePA_type_pafn;
   transferType?: stTransferType_type_pafn;
   fault?: faultBean_type_ppt;
+  amount?: stAmount_type_pafn;
 }
 
 interface IActivateRequest {
@@ -20,8 +20,11 @@ interface IActivateRequest {
   transferType?: stTransferType_type_pafn;
   fault?: faultBean_type_ppt;
   amount?: stAmount_type_pafn;
+  description?: string;
   IBAN_1?: string;
   IBAN_2?: string;
+  remittanceInformation1Bollettino?: string;
+  remittanceInformation2Bollettino?: string;
 }
 
 interface IRTRequest {
@@ -42,7 +45,7 @@ export const paVerifyPaymentNoticeRes = (
           ? // tslint:disable-next-line: no-nested-template-literals
             `<paymentList>
         <paymentOptionDescription>
-          <amount>120.00</amount>
+          <amount>${params.amount}</amount>
           <options>EQ</options>
           <dueDate>2021-07-31</dueDate>
           <detailDescription>pagamentoTest</detailDescription>
@@ -81,10 +84,12 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
             params.fiscalCodePA
               ? // tslint:disable-next-line: no-nested-template-literals
                 `<data>
-                    <creditorReferenceId>${params.creditorReferenceId}</creditorReferenceId>
-                    <paymentAmount>120.00</paymentAmount>
+                    <creditorReferenceId>${
+                      params.creditorReferenceId
+                    }</creditorReferenceId>
+                    <paymentAmount>${params.amount}</paymentAmount>
                     <dueDate>2021-07-31</dueDate>
-                    <description>TARI/TEFA 2021</description>
+                    <description>${params.description}</description>
                     <companyName>company PA</companyName>
                     <officeName>office PA</officeName>
                     <debtor>
@@ -107,17 +112,23 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                         <transferAmount>100.00</transferAmount>
                         <fiscalCodePA>77777777777</fiscalCodePA>
                         <IBAN>${params.IBAN_1}</IBAN>
-                        <remittanceInformation>TARI Comune EC_TE su bollettino</remittanceInformation>
+                        <remittanceInformation>TARI Comune EC_TE${
+                          params.remittanceInformation1Bollettino
+                        }</remittanceInformation>
                         <transferCategory>0101101IM</transferCategory>
                       </transfer>
-                      <transfer>
+                      ${
+                        params.IBAN_2
+                          ? `<transfer>
                         <idTransfer>2</idTransfer>
                         <transferAmount>20.00</transferAmount>
                         <fiscalCodePA>01199250158</fiscalCodePA>
                         <IBAN>${params.IBAN_2}</IBAN>
-                        <remittanceInformation>TEFA Comune Milano</remittanceInformation>
+                        <remittanceInformation>TEFA Comune Milano${params.remittanceInformation2Bollettino}</remittanceInformation>
                         <transferCategory>0201102IM</transferCategory>
-                      </transfer>
+                      </transfer>`
+                          : ""
+                      }
                     </transferList>
                   </data>`
               : ""

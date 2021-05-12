@@ -2,7 +2,7 @@ import * as express from "express";
 import * as http from "http";
 import {
   IWithinRangeStringTag,
-  NonEmptyString
+  NonEmptyString,
 } from "italia-ts-commons/lib/strings";
 import waitForExpect from "wait-for-expect";
 import * as FespCdServer from "../__mock__/FespCdServer";
@@ -14,8 +14,9 @@ import { cdInfoWispResponse_element_ppt } from "../generated/FespCdService/cdInf
 import { nodoAttivaRPT_element_ppt } from "../generated/PagamentiTelematiciPspNodoservice/nodoAttivaRPT_element_ppt";
 import { nodoVerificaRPT_element_ppt } from "../generated/PagamentiTelematiciPspNodoservice/nodoVerificaRPT_element_ppt";
 import * as FespCdClient from "../services/pagopa_api/FespCdClient";
+import { POSITIONS_STATUS } from "../utils/helper";
 
-const sleep = (ms: number) => new Promise(ok => setTimeout(ok, ms));
+const sleep = (ms: number) => new Promise((ok) => setTimeout(ok, ms));
 // tslint:disable-next-line: no-let
 let server: http.Server;
 
@@ -29,14 +30,14 @@ const aValidPassword = CONFIG.PAGOPA_PROXY.PASSWORD as string &
 const aCodiceContestoPagamento = "1" as string & IWithinRangeStringTag<1, 36>;
 const aCodiceInfrastrutturaPSP = "";
 const aCodiceIdRPT = {
-  a: true
+  a: true,
 };
 const mockedNodoAttivaRequest: nodoAttivaRPT_element_ppt = {
   codiceContestoPagamento: aCodiceContestoPagamento,
   codiceIdRPT: aCodiceIdRPT,
   codificaInfrastrutturaPSP: aCodiceInfrastrutturaPSP,
   datiPagamentoPSP: {
-    importoSingoloVersamento: anImportoSingoloVersamento
+    importoSingoloVersamento: anImportoSingoloVersamento,
   },
   identificativoCanale: anIdentificativoCanale,
   identificativoCanalePagamento: "1" as string & IWithinRangeStringTag<1, 36>,
@@ -45,7 +46,7 @@ const mockedNodoAttivaRequest: nodoAttivaRPT_element_ppt = {
     IWithinRangeStringTag<1, 36>,
   identificativoPSP: anIdentificativoPSP,
   // tslint:disable-next-line: no-hardcoded-credentials
-  password: aValidPassword
+  password: aValidPassword,
 };
 
 const mockedNodoVerificaRPT: nodoVerificaRPT_element_ppt = {
@@ -55,7 +56,7 @@ const mockedNodoVerificaRPT: nodoVerificaRPT_element_ppt = {
   identificativoCanale: anIdentificativoCanale,
   identificativoIntermediarioPSP: anIdentificativoIntermediarioPSP,
   identificativoPSP: anIdentificativoPSP,
-  password: aValidPassword
+  password: aValidPassword,
 };
 
 const getPagopaClient = async () =>
@@ -63,8 +64,8 @@ const getPagopaClient = async () =>
     await PPTPortClient.createPagamentiTelematiciPspNodoClient({
       endpoint: `${CONFIG.NODO_MOCK.HOST}:${CONFIG.NODO_MOCK.PORT}${CONFIG.NODO_MOCK.ROUTES.PPT_NODO}`,
       wsdl_options: {
-        timeout: 1000
-      }
+        timeout: 1000,
+      },
     })
   );
 
@@ -81,7 +82,9 @@ describe("index#nodoAttivaRPT", () => {
     const config = Configuration.decode(CONFIG).getOrElseL(() => {
       throw Error(`Invalid configuration.`);
     });
-    server = http.createServer(await newExpressApp(config));
+    server = http.createServer(
+      await newExpressApp(config, new Map<string, POSITIONS_STATUS>())
+    );
     server.listen(config.NODO_MOCK.PORT);
     // Configure PagoPaProxy mock server
     const app = express();
@@ -101,7 +104,7 @@ describe("index#nodoAttivaRPT", () => {
     const response = await pagoPAClient.nodoAttivaRPT({
       ...mockedNodoAttivaRequest,
       password: `${aValidPassword}_wrong` as string &
-        IWithinRangeStringTag<8, 16>
+        IWithinRangeStringTag<8, 16>,
     });
     expect(response).toEqual({
       nodoAttivaRPTRisposta: {
@@ -109,9 +112,9 @@ describe("index#nodoAttivaRPT", () => {
         fault: {
           faultCode: "401",
           faultString: "Invalid password",
-          id: "0"
-        }
-      }
+          id: "0",
+        },
+      },
     });
     await waitForExpect(async () => {
       await sleep(2000);
@@ -127,10 +130,10 @@ describe("index#nodoAttivaRPT", () => {
         datiPagamentoPA: {
           causaleVersamento: "Causale versamento mock",
           ibanAccredito: "IT47L0300203280645139156879",
-          importoSingoloVersamento: anImportoSingoloVersamento.toFixed(2)
+          importoSingoloVersamento: anImportoSingoloVersamento.toFixed(2),
         },
-        esito: "OK"
-      }
+        esito: "OK",
+      },
     });
     await waitForExpect(() => {
       expect(mockExpressHandler).toHaveBeenCalledTimes(1);
@@ -144,7 +147,9 @@ describe("index#nodoVerificaRPT", () => {
     const config = Configuration.decode(CONFIG).getOrElseL(() => {
       throw Error(`Invalid configuration.`);
     });
-    server = http.createServer(await newExpressApp(config));
+    server = http.createServer(
+      await newExpressApp(config, new Map<string, POSITIONS_STATUS>())
+    );
     server.listen(config.NODO_MOCK.PORT);
   });
   afterAll(() => {
@@ -155,7 +160,7 @@ describe("index#nodoVerificaRPT", () => {
     const response = await pagoPAClient.nodoVerificaRPT({
       ...mockedNodoVerificaRPT,
       password: `${aValidPassword}_wrong` as string &
-        IWithinRangeStringTag<8, 16>
+        IWithinRangeStringTag<8, 16>,
     });
     expect(response).toEqual({
       nodoVerificaRPTRisposta: {
@@ -163,9 +168,9 @@ describe("index#nodoVerificaRPT", () => {
         fault: {
           faultCode: "401",
           faultString: "Invalid password",
-          id: "0"
-        }
-      }
+          id: "0",
+        },
+      },
     });
   });
   it("nodoVerificaRPT should returns a valid success response", async () => {
@@ -176,10 +181,10 @@ describe("index#nodoVerificaRPT", () => {
         datiPagamentoPA: {
           causaleVersamento: "Causale versamento mock",
           ibanAccredito: "IT47L0300203280645139156879",
-          importoSingoloVersamento: anImportoSingoloVersamento.toFixed(2)
+          importoSingoloVersamento: anImportoSingoloVersamento.toFixed(2),
         },
-        esito: "OK"
-      }
+        esito: "OK",
+      },
     });
   });
 });
@@ -193,20 +198,20 @@ describe("Test SOAP Server", () => {
         cb?: (data: cdInfoWispResponse_element_ppt) => void
       ) => {
         cdInfoWisp_element_ppt.decode(input).bimap(
-          err =>
+          (err) =>
             cb
               ? cb({
-                  esito: "KO"
+                  esito: "KO",
                 })
               : err,
-          _ =>
+          (_) =>
             cb
               ? cb({
-                  esito: "OK"
+                  esito: "OK",
                 })
               : _
         );
-      }
+      },
     });
     const soapServer = http.createServer(app);
     soapServer.listen(3000);
@@ -214,8 +219,8 @@ describe("Test SOAP Server", () => {
       await FespCdClient.createFespCdClient({
         endpoint: `http://localhost:3000${expectedFespUrl}`,
         wsdl_options: {
-          timeout: 1000
-        }
+          timeout: 1000,
+        },
       })
     );
     const response = await pagoPaProxyClient.cdInfoWisp({
@@ -231,7 +236,7 @@ describe("Test SOAP Server", () => {
         Math.random()
           .toString(36)
           .slice(2)
-          .toUpperCase() as (string & IWithinRangeStringTag<1, 36>) // TODO: check required format
+          .toUpperCase() as (string & IWithinRangeStringTag<1, 36>), // TODO: check required format
     });
     expect(response).toEqual({ esito: "OK" });
     soapServer.close();
