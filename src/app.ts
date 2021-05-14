@@ -89,7 +89,10 @@ export async function newExpressApp(
             outcome: "KO",
             fault: {
               faultCode: PAA_PAGAMENTO_SCONOSCIUTO.value,
-              faultString: "numero avviso devo inziare con 3020[0|1|2|3]",
+              faultString:
+                "Pagamento in attesa risulta sconosciuto all’Ente Creditore",
+              description:
+                "numero avviso deve iniziare con 302[00|01|02|03|04|05|99]",
               id: faultId,
             },
           });
@@ -182,7 +185,10 @@ export async function newExpressApp(
             outcome: "KO",
             fault: {
               faultCode: PAA_PAGAMENTO_SCONOSCIUTO.value,
-              faultString: "numero avviso devo inziare con 3020[0|1|2|3]",
+              faultString:
+                "Pagamento in attesa risulta sconosciuto all’Ente Creditore",
+              description:
+                "numero avviso deve iniziare con 302[00|01|02|03|04|05|99]",
               id: faultId,
             },
           });

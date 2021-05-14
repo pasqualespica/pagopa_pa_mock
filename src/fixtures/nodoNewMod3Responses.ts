@@ -64,6 +64,7 @@ export const paVerifyPaymentNoticeRes = (
             `<fault>
         <faultCode>${params.fault.faultCode}</faultCode>
         <faultString>${params.fault.faultString}</faultString>
+        <description>${params.fault.description}</description>
         <id>${params.fault.id}</id>
       </fault>`
           : ""
@@ -139,6 +140,7 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                 `<fault>
             <faultCode>${params.fault.faultCode}</faultCode>
             <faultString>${params.fault.faultString}</faultString>
+            <description>${params.fault.description}</description>
             <id>${params.fault.id}</id>
           </fault>`
               : ""
