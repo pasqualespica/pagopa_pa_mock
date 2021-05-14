@@ -240,8 +240,6 @@ export async function newExpressApp(
               .status(paGetPaymentResponse[0])
               .send(paGetPaymentResponse[1]);
           } else {
-            // non esiste - la blocco
-            db.set(noticenumber[0], POSITIONS_STATUS.CLOSE);
             // happy case
 
             // retrive 0,1,2,3 from noticenumber
@@ -315,8 +313,10 @@ export async function newExpressApp(
         const paSendRT = soapRequest[sentReceipt][0];
         const iuv = paSendRT.receipt[0].creditorreferenceid[0];
 
-        // libero la posizione - cancello
-        db.delete(iuv);
+        // // libero la posizione - cancello
+        // db.delete(iuv);
+        // esiste - la CHIUDO
+        db.set(iuv, POSITIONS_STATUS.CLOSE);
 
         const paSendRTResponse = paSendRtRes({
           outcome: "OK",
