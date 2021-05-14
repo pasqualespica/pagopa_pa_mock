@@ -107,7 +107,9 @@ export async function newExpressApp(
             outcome: "KO",
             fault: {
               faultCode: PAA_PAGAMENTO_SCADUTO.value,
-              faultString: `il numero avviso ${noticenumber} e' scaduto`,
+              faultString:
+                "Pagamento in attesa risulta scaduto all’Ente Creditore",
+              description: `il numero avviso ${noticenumber} e' scaduto`,
               id: faultId,
             },
           });
@@ -203,7 +205,9 @@ export async function newExpressApp(
             outcome: "KO",
             fault: {
               faultCode: PAA_PAGAMENTO_SCADUTO.value,
-              faultString: `il numero avviso ${noticenumber} e' scaduto`,
+              faultString:
+                "Pagamento in attesa risulta scaduto all’Ente Creditore",
+              description: `il numero avviso ${noticenumber} e' scaduto`,
               id: faultId,
             },
           });
