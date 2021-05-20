@@ -32,5 +32,8 @@ curl -H "Content-Type: text/xml; charset=utf-8" -H "SOAPAction:paVerifyPaymentNo
 curl -H "Content-Type: text/xml; charset=utf-8" -H "SOAPAction:paGetPaymentReq"  -d @paGetPaymentReq_avv99.xml -X POST http://localhost:8089/mockPagamentiTelematiciCCP
 
 # PAA_PAGAMENTO_DUPLICATO -> CLOSED (si va in questo stato solo alla ricezione della receipt)
+# prma però devo mandare sentRT
+curl -H "Content-Type: text/xml; charset=utf-8" -H "SOAPAction:paSendRTReq"  -d @paSendRTReq_avv4.xml -X POST http://localhost:8089/mockPagamentiTelematiciCCP
+curl -H "Content-Type: text/xml; charset=utf-8" -H "SOAPAction:paGetPaymentReq"  -d @paGetPaymentReq_avv4.xml -X POST http://localhost:8089/mockPagamentiTelematiciCCP
 
 
