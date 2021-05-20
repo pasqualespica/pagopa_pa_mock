@@ -85,19 +85,19 @@ This _optional_ section is usefull if you want run `pagopa-pa-mock` locally 🚀
 
 ```sh
 yarn install
-yarn build
-yarn start
+yarn build && yarn start
 ```
 ### Environment
 
-  | name                 | description                   | default            |
-  | -------------------- | ----------------------------- | ------------------ |
-  | WINSTON_LOG_LEVEL    | desired log level             | "debug"            |
-  | PAGOPA_NODO_HOST     | host this server listens to   | "http://localhost" |
-  | PORT                 | host this server listens to   | 8089               |
-  | PAGOPA_PROXY_HOST    | PagoPa Proxy host             | localhost          |
-  | PAGOPA_NODO_PASSWORD | nodo mock auth password       | password           |
-  | PAGOPA_PROXY_PORT    | PagoPa Proxy port             | 3001               |
-  | PAGOPA_WS_URI        | PagoPa Proxy SOAP service URI | `/FespCdService`   |
+  | name                 | description                   | default                               |
+  | -------------------- | ----------------------------- | ------------------                    |
+  | WINSTON_LOG_LEVEL    | desired log level             | `debug`                               |
+  | PAGOPA_NODO_HOST     | host this server listens to   | `http://localhost`                    |
+  | PORT                 | host this server listens to   | 8089                                  |
+  | BASE_PATH            | `host:port\<BASE_PATH>`       | `mockPagamentiTelematiciCCP`          |
+
+  | PAGOPA_NODO_PASSWORD | nodo mock auth password       | password                              |
+  | PAGOPA_PROXY_PORT    | PagoPa Proxy port             | 3001                                  |
+  | PAGOPA_WS_URI        | PagoPa Proxy SOAP service URI | `/FespCdService`                      |
   
 </details>

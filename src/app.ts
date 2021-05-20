@@ -43,7 +43,7 @@ const amount2 = 20.0;
 const descriptionAll = "TARI/TEFA 2021";
 const descriptionMono = "TARI 2021";
 
-function log_event_tx(resp: MockResponse) {
+function log_event_tx(resp: MockResponse): void {
   logger.info(`>>> tx RESPONSE [${resp[0]}]: `);
   logger.info(resp[1]);
 }
@@ -53,7 +53,7 @@ export async function newExpressApp(
   db: Map<string, POSITIONS_STATUS>
 ): Promise<Express.Application> {
   const app = express();
-  app.set("port", config.NODO_MOCK.PORT);
+  app.set("port", config.PA_MOCK.PORT);
   const loggerFormat =
     ":date[iso] [info]: :method :url :status - :response-time ms";
   app.use(morgan(loggerFormat));
@@ -62,9 +62,9 @@ export async function newExpressApp(
   app.use(express.urlencoded());
   app.use(bodyParserXml({}));
 
-  logger.info(`Path ${config.NODO_MOCK.ROUTES.PPT_NODO} ...`);
+  logger.info(`Path ${config.PA_MOCK.ROUTES.PPT_NODO} ...`);
   // SOAP Server mock entrypoint
-  app.post(config.NODO_MOCK.ROUTES.PPT_NODO, async (req, res) => {
+  app.post(config.PA_MOCK.ROUTES.PPT_NODO, async (req, res) => {
     logger.info(`>>> rx REQUEST :`);
     logger.info(JSON.stringify(req.body));
     try {

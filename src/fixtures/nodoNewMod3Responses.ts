@@ -1,7 +1,7 @@
+import { ctFaultBean_type_pafn } from "../generated/paForNode_Service/ctFaultBean_type_pafn";
 import { stAmount_type_pafn } from "../generated/paForNode_Service/stAmount_type_pafn";
 import { stFiscalCodePA_type_pafn } from "../generated/paForNode_Service/stFiscalCodePA_type_pafn";
 import { stTransferType_type_pafn } from "../generated/paForNode_Service/stTransferType_type_pafn";
-import { faultBean_type_ppt } from "../generated/PagamentiTelematiciPspNodoservice/faultBean_type_ppt";
 
 export type MockResponse = readonly [number, string];
 
@@ -9,7 +9,7 @@ interface IVerifyRequest {
   outcome: "OK" | "KO";
   fiscalCodePA?: stFiscalCodePA_type_pafn;
   transferType?: stTransferType_type_pafn;
-  fault?: faultBean_type_ppt;
+  fault?: ctFaultBean_type_pafn;
   amount?: stAmount_type_pafn;
 }
 
@@ -18,7 +18,7 @@ interface IActivateRequest {
   creditorReferenceId?: string;
   fiscalCodePA?: stFiscalCodePA_type_pafn;
   transferType?: stTransferType_type_pafn;
-  fault?: faultBean_type_ppt;
+  fault?: ctFaultBean_type_pafn;
   amount?: stAmount_type_pafn;
   description?: string;
   IBAN_1?: string;

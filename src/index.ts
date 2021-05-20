@@ -5,6 +5,7 @@ import { CONFIG, Configuration } from "./config";
 import { POSITIONS_STATUS } from "./utils/helper";
 import { logger } from "./utils/logger";
 
+// tslint:disable-next-line: no-let
 let dbNotices: Map<string, POSITIONS_STATUS> = new Map<
   string,
   POSITIONS_STATUS
@@ -20,10 +21,10 @@ App.newExpressApp(config, dbNotices)
   .then((app) => {
     // Create a HTTP server from the new Express Application
     const server = http.createServer(app);
-    server.listen(config.NODO_MOCK.PORT);
+    server.listen(config.PA_MOCK.PORT, config.PA_MOCK.HOST);
 
     logger.info(
-      `Server started at ${config.NODO_MOCK.HOST}:${config.NODO_MOCK.PORT}`
+      `Server started at ${config.PA_MOCK.HOST}:${config.PA_MOCK.PORT}`
     );
   })
   .catch((error) => {
