@@ -49,7 +49,7 @@ export const paVerifyPaymentNoticeRes = (
           <options>EQ</options>
           <dueDate>2021-07-31</dueDate>
           <detailDescription>pagamentoTest</detailDescription>
-          ${params.transferType ? `<transferType>POSTAL</transferType>` : ""}
+          ${params.transferType ? `<allCCP>true</allCCP>` : ""}
         </paymentOptionDescription>
       </paymentList>
       <paymentDescription>Pagamento di Test</paymentDescription>
@@ -64,8 +64,8 @@ export const paVerifyPaymentNoticeRes = (
             `<fault>
         <faultCode>${params.fault.faultCode}</faultCode>
         <faultString>${params.fault.faultString}</faultString>
-        <description>${params.fault.description}</description>
         <id>${params.fault.id}</id>
+        <description>${params.fault.description}</description>
       </fault>`
           : ""
       }
@@ -140,8 +140,8 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                 `<fault>
             <faultCode>${params.fault.faultCode}</faultCode>
             <faultString>${params.fault.faultString}</faultString>
-            <description>${params.fault.description}</description>
             <id>${params.fault.id}</id>
+            <description>${params.fault.description}</description>
           </fault>`
               : ""
           }
