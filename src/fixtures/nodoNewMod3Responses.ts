@@ -21,8 +21,8 @@ interface IActivateRequest {
   fault?: ctFaultBean_type_pafn;
   amount?: stAmount_type_pafn;
   description?: string;
-  IBAN_1?: string;
-  IBAN_2?: string;
+  iban_1?: string;
+  iban_2?: string;
   remittanceInformation1Bollettino?: string;
   remittanceInformation2Bollettino?: string;
 }
@@ -49,7 +49,7 @@ export const paVerifyPaymentNoticeRes = (
           <options>EQ</options>
           <dueDate>2021-07-31</dueDate>
           <detailDescription>pagamentoTest</detailDescription>
-          ${params.transferType ? `<allCCP>true</allCCP>` : ""}
+          ${params.transferType ? "<allCCP>true</allCCP>" : ""}
         </paymentOptionDescription>
       </paymentList>
       <paymentDescription>Pagamento di Test</paymentDescription>
@@ -112,19 +112,19 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                         <idTransfer>1</idTransfer>
                         <transferAmount>100.00</transferAmount>
                         <fiscalCodePA>77777777777</fiscalCodePA>
-                        <IBAN>${params.IBAN_1}</IBAN>
+                        <IBAN>${params.iban_1}</IBAN>
                         <remittanceInformation>TARI Comune EC_TE${
                           params.remittanceInformation1Bollettino
                         }</remittanceInformation>
                         <transferCategory>0101101IM</transferCategory>
                       </transfer>
                       ${
-                        params.IBAN_2
+                        params.iban_2
                           ? `<transfer>
                         <idTransfer>2</idTransfer>
                         <transferAmount>20.00</transferAmount>
                         <fiscalCodePA>01199250158</fiscalCodePA>
-                        <IBAN>${params.IBAN_2}</IBAN>
+                        <IBAN>${params.iban_2}</IBAN>
                         <remittanceInformation>TEFA Comune Milano${params.remittanceInformation2Bollettino}</remittanceInformation>
                         <transferCategory>0201102IM</transferCategory>
                       </transfer>`

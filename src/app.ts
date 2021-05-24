@@ -43,11 +43,14 @@ const amount2 = 20.0;
 const descriptionAll = "TARI/TEFA 2021";
 const descriptionMono = "TARI 2021";
 
+const onBollettino = " su bollettino";
+
 function log_event_tx(resp: MockResponse): void {
   logger.info(`>>> tx RESPONSE [${resp[0]}]: `);
   logger.info(resp[1]);
 }
 
+// tslint:disable-next-line: no-big-function
 export async function newExpressApp(
   config: Configuration,
   db: Map<string, POSITIONS_STATUS>
@@ -86,15 +89,15 @@ export async function newExpressApp(
         if (!isValidNotice && !isExpiredNotice) {
           // error case PAA_PAGAMENTO_SCONOSCIUTO
           const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
-            outcome: "KO",
             fault: {
+              description:
+                "numero avviso deve iniziare con 302[00|01|02|03|04|05|99]",
               faultCode: PAA_PAGAMENTO_SCONOSCIUTO.value,
               faultString:
                 "Pagamento in attesa risulta sconosciuto all’Ente Creditore",
-              description:
-                "numero avviso deve iniziare con 302[00|01|02|03|04|05|99]",
               id: faultId,
             },
+            outcome: "KO",
           });
 
           log_event_tx(paVerifyPaymentNoticeResponse);
@@ -104,14 +107,14 @@ export async function newExpressApp(
         } else if (isExpiredNotice) {
           // error case PAA_PAGAMENTO_SCADUTO
           const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
-            outcome: "KO",
             fault: {
+              description: `il numero avviso ${noticenumber} e' scaduto`,
               faultCode: PAA_PAGAMENTO_SCADUTO.value,
               faultString:
                 "Pagamento in attesa risulta scaduto all’Ente Creditore",
-              description: `il numero avviso ${noticenumber} e' scaduto`,
               id: faultId,
             },
+            outcome: "KO",
           });
 
           log_event_tx(paVerifyPaymentNoticeResponse);
@@ -124,7 +127,6 @@ export async function newExpressApp(
             // già esiste
             // error case PAA_PAGAMENTO_IN_CORSO
             const paVerifyPaymentNoticeResponse = paVerifyPaymentNoticeRes({
-              outcome: "KO",
               fault: {
                 faultCode:
                   b === POSITIONS_STATUS.IN_PROGRESS
@@ -135,6 +137,7 @@ export async function newExpressApp(
                 faultString: `Errore ${noticenumber}`,
                 id: faultId,
               },
+              outcome: "KO",
             });
 
             log_event_tx(paVerifyPaymentNoticeResponse);
@@ -167,7 +170,6 @@ export async function newExpressApp(
       // 2. paGetPayment
       if (soapRequest[activateSoapRequest]) {
         const paGetPayment = soapRequest[activateSoapRequest][0];
-
         const fiscalcode = paGetPayment.qrcode[0].fiscalcode;
         const noticenumber: string = paGetPayment.qrcode[0].noticenumber;
         const creditorReferenceId = noticenumber[0].substring(1);
@@ -184,15 +186,15 @@ export async function newExpressApp(
         if (!isValidNotice && !isExpiredNotice) {
           // error case
           const paGetPaymentResponse = paGetPaymentRes({
-            outcome: "KO",
             fault: {
+              description:
+                "numero avviso deve iniziare con 302[00|01|02|03|04|05|99]",
               faultCode: PAA_PAGAMENTO_SCONOSCIUTO.value,
               faultString:
                 "Pagamento in attesa risulta sconosciuto all’Ente Creditore",
-              description:
-                "numero avviso deve iniziare con 302[00|01|02|03|04|05|99]",
               id: faultId,
             },
+            outcome: "KO",
           });
 
           log_event_tx(paGetPaymentResponse);
@@ -202,14 +204,14 @@ export async function newExpressApp(
         } else if (isExpiredNotice) {
           // error case PAA_PAGAMENTO_SCADUTO
           const paGetPaymentResponse = paGetPaymentRes({
-            outcome: "KO",
             fault: {
+              description: `il numero avviso ${noticenumber} e' scaduto`,
               faultCode: PAA_PAGAMENTO_SCADUTO.value,
               faultString:
                 "Pagamento in attesa risulta scaduto all’Ente Creditore",
-              description: `il numero avviso ${noticenumber} e' scaduto`,
               id: faultId,
             },
+            outcome: "KO",
           });
 
           log_event_tx(paGetPaymentResponse);
@@ -244,37 +246,41 @@ export async function newExpressApp(
 
             // retrive 0,1,2,3 from noticenumber
             const idIbanAvviso: number = +noticenumber[0].substring(4, 5);
+            // tslint:disable-next-line: no-let
             let iban1;
+            // tslint:disable-next-line: no-let
             let iban2;
+            // tslint:disable-next-line: no-let
             let remittanceInformation1Bollettino = "";
+            // tslint:disable-next-line: no-let
             let remittanceInformation2Bollettino = "";
 
             switch (idIbanAvviso) {
               case 0: // CCPost + CCPost
                 iban1 = CCPostPrimaryEC;
                 iban2 = CCPostSecondaryEC;
-                remittanceInformation1Bollettino = " su bollettino";
-                remittanceInformation2Bollettino = " su bollettino";
+                remittanceInformation1Bollettino = onBollettino;
+                remittanceInformation2Bollettino = onBollettino;
                 break;
               case 1: // CCPost + CCBank
                 iban1 = CCPostPrimaryEC;
                 iban2 = CCBankSecondaryEC;
-                remittanceInformation1Bollettino = " su bollettino";
+                remittanceInformation1Bollettino = onBollettino;
                 break;
               case 2: // CCBank + CCPost
                 iban1 = CCBankPrimaryEC;
                 iban2 = CCPostSecondaryEC;
-                remittanceInformation2Bollettino = " su bollettino";
+                remittanceInformation2Bollettino = onBollettino;
                 break;
               case 3: // CCBank + CCBank
                 iban1 = CCBankPrimaryEC;
                 iban2 = CCBankSecondaryEC;
                 break;
-              case 4: //CCPost - Monobeneficiario
+              case 4: // CCPost - Monobeneficiario
                 iban1 = CCPostPrimaryEC;
-                remittanceInformation1Bollettino = " su bollettino";
+                remittanceInformation1Bollettino = onBollettino;
                 break;
-              case 5: //CCBank - Monobeneficiario
+              case 5: // CCBank - Monobeneficiario
                 iban1 = CCBankPrimaryEC;
                 break;
               default:
@@ -283,19 +289,19 @@ export async function newExpressApp(
             }
 
             const paGetPaymentResponse = paGetPaymentRes({
-              outcome: "OK",
               amount:
                 avviso5.test(noticenumber) || avviso6.test(noticenumber)
                   ? amount1
                   : amount1 + amount2,
+              creditorReferenceId,
               description:
                 avviso5.test(noticenumber) || avviso6.test(noticenumber)
                   ? descriptionMono
                   : descriptionAll,
               fiscalCodePA: fiscalcode,
-              creditorReferenceId,
-              IBAN_1: iban1,
-              IBAN_2: iban2,
+              iban_1: iban1,
+              iban_2: iban2,
+              outcome: "OK",
               remittanceInformation1Bollettino,
               remittanceInformation2Bollettino,
             });
