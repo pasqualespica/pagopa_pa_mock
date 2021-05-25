@@ -5,8 +5,7 @@ import { CONFIG, Configuration } from "./config";
 import { POSITIONS_STATUS } from "./utils/helper";
 import { logger } from "./utils/logger";
 
-// tslint:disable-next-line: no-let
-let dbNotices: Map<string, POSITIONS_STATUS> = new Map<
+const dbNotices: Map<string, POSITIONS_STATUS> = new Map<
   string,
   POSITIONS_STATUS
 >();

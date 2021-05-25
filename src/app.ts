@@ -67,6 +67,7 @@ export async function newExpressApp(
 
   logger.info(`Path ${config.PA_MOCK.ROUTES.PPT_NODO} ...`);
   // SOAP Server mock entrypoint
+  // eslint-disable-next-line complexity
   app.post(config.PA_MOCK.ROUTES.PPT_NODO, async (req, res) => {
     logger.info(`>>> rx REQUEST :`);
     logger.info(JSON.stringify(req.body));

@@ -49,7 +49,7 @@ export const paVerifyPaymentNoticeRes = (
           <options>EQ</options>
           <dueDate>2021-07-31</dueDate>
           <detailDescription>pagamentoTest</detailDescription>
-          ${params.transferType ? "<allCCP>true</allCCP>" : ""}
+          <allCCP>${params.transferType ? "true" : "false"}</allCCP>
         </paymentOptionDescription>
       </paymentList>
       <paymentDescription>Pagamento di Test</paymentDescription>
