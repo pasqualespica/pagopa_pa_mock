@@ -8,4 +8,6 @@ src/generated
 .DS_Store
 pagopa-mock.log
 .env
+*.h2.db
+*.log
 

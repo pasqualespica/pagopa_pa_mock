@@ -1,25 +1,25 @@
-import { ctFaultBean_type_pafn } from "../generated/paForNode_Service/ctFaultBean_type_pafn";
-import { stAmount_type_pafn } from "../generated/paForNode_Service/stAmount_type_pafn";
-import { stFiscalCodePA_type_pafn } from "../generated/paForNode_Service/stFiscalCodePA_type_pafn";
-import { stTransferType_type_pafn } from "../generated/paForNode_Service/stTransferType_type_pafn";
+import { ctFaultBean_type_pafn } from '../generated/paForNode_Service/ctFaultBean_type_pafn';
+import { stAmount_type_pafn } from '../generated/paForNode_Service/stAmount_type_pafn';
+import { stFiscalCodePA_type_pafn } from '../generated/paForNode_Service/stFiscalCodePA_type_pafn';
+import { stTransferType_type_pafn } from '../generated/paForNode_Service/stTransferType_type_pafn';
 
 export type MockResponse = readonly [number, string];
 
 interface IVerifyRequest {
-  outcome: "OK" | "KO";
+  outcome: 'OK' | 'KO';
   fiscalCodePA?: stFiscalCodePA_type_pafn;
   transferType?: stTransferType_type_pafn;
   fault?: ctFaultBean_type_pafn;
-  amount?: stAmount_type_pafn;
+  amount?: stAmount_type_pafn | string;
 }
 
 interface IActivateRequest {
-  outcome: "OK" | "KO";
+  outcome: 'OK' | 'KO';
   creditorReferenceId?: string;
   fiscalCodePA?: stFiscalCodePA_type_pafn;
   transferType?: stTransferType_type_pafn;
   fault?: ctFaultBean_type_pafn;
-  amount?: stAmount_type_pafn;
+  amount?: stAmount_type_pafn | string;
   description?: string;
   iban_1?: string;
   iban_2?: string;
@@ -28,12 +28,10 @@ interface IActivateRequest {
 }
 
 interface IRTRequest {
-  outcome: "OK" | "KO";
+  outcome: 'OK' | 'KO';
 }
 
-export const paVerifyPaymentNoticeRes = (
-  params: IVerifyRequest
-): MockResponse => [
+export const paVerifyPaymentNoticeRes = (params: IVerifyRequest): MockResponse => [
   200,
   `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
   <soapenv:Header />
@@ -45,18 +43,18 @@ export const paVerifyPaymentNoticeRes = (
           ? // tslint:disable-next-line: no-nested-template-literals
             `<paymentList>
         <paymentOptionDescription>
-          <amount>${params.amount?.toFixed(2)}</amount>
+          <amount>${params.amount}</amount>
           <options>EQ</options>
           <dueDate>2021-07-31</dueDate>
           <detailDescription>pagamentoTest</detailDescription>
-          <allCCP>${params.transferType ? "true" : "false"}</allCCP>
+          <allCCP>${params.transferType ? 'true' : 'false'}</allCCP>
         </paymentOptionDescription>
       </paymentList>
       <paymentDescription>Pagamento di Test</paymentDescription>
       <fiscalCodePA>${params.fiscalCodePA}</fiscalCodePA>
       <companyName>companyName</companyName>
       <officeName>officeName</officeName>`
-          : ""
+          : ''
       }
       ${
         params.fault
@@ -67,7 +65,7 @@ export const paVerifyPaymentNoticeRes = (
         <id>${params.fault.id}</id>
         <description>${params.fault.description}</description>
       </fault>`
-          : ""
+          : ''
       }
     </paf:paVerifyPaymentNoticeRes>
   </soapenv:Body>
@@ -75,8 +73,8 @@ export const paVerifyPaymentNoticeRes = (
 ];
 
 export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
-         200,
-         `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
+  200,
+  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
     <soapenv:Header/>
     <soapenv:Body>
         <paf:paGetPaymentRes>
@@ -85,10 +83,8 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
             params.fiscalCodePA
               ? // tslint:disable-next-line: no-nested-template-literals
                 `<data>
-                    <creditorReferenceId>${
-                      params.creditorReferenceId
-                    }</creditorReferenceId>
-                    <paymentAmount>${params.amount?.toFixed(2)}</paymentAmount>
+                    <creditorReferenceId>${params.creditorReferenceId}</creditorReferenceId>
+                    <paymentAmount>${params.amount}</paymentAmount>
                     <dueDate>2021-07-31</dueDate>
                     <description>${params.description}</description>
                     <companyName>company PA</companyName>
@@ -120,7 +116,8 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                       </transfer>
                       ${
                         params.iban_2
-                          ? `<transfer>
+                          ? // tslint:disable-next-line: no-nested-template-literals
+                            `<transfer>
                         <idTransfer>2</idTransfer>
                         <transferAmount>20.00</transferAmount>
                         <fiscalCodePA>01199250158</fiscalCodePA>
@@ -128,11 +125,11 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
                         <remittanceInformation>TEFA Comune Milano${params.remittanceInformation2Bollettino}</remittanceInformation>
                         <transferCategory>0201102IM</transferCategory>
                       </transfer>`
-                          : ""
+                          : ''
                       }
                     </transferList>
                   </data>`
-              : ""
+              : ''
           }
           ${
             params.fault
@@ -143,12 +140,12 @@ export const paGetPaymentRes = (params: IActivateRequest): MockResponse => [
             <id>${params.fault.id}</id>
             <description>${params.fault.description}</description>
           </fault>`
-              : ""
+              : ''
           }
       </paf:paGetPaymentRes>
     </soapenv:Body>
   </soapenv:Envelope>`,
-       ];
+];
 
 export const paSendRtRes = (params: IRTRequest): MockResponse => [
   200,

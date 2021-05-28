@@ -2,17 +2,17 @@
  * Common configurations for Proxy PagoPA and external resources
  */
 
-import * as dotenv from "dotenv";
-import * as t from "io-ts";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import * as dotenv from 'dotenv';
+import * as t from 'io-ts';
+import { NonEmptyString } from 'italia-ts-commons/lib/strings';
 
 dotenv.config();
 
-const localhost = "localhost";
+const localhost = 'localhost';
 
 export const CONFIG = {
   // The log level used for Winston logger (error, info, debug)
-  WINSTON_LOG_LEVEL: process.env.WINSTON_LOG_LEVEL || "debug",
+  WINSTON_LOG_LEVEL: process.env.WINSTON_LOG_LEVEL || 'debug',
 
   // RESTful Webservice configuration
   // These information are documented here:
@@ -23,7 +23,7 @@ export const CONFIG = {
     PORT: process.env.PORT || 8089,
     // SHA256 client certificate fingerprint (without `:` separators)
     ROUTES: {
-      PPT_NODO: "/mockPagamentiTelematiciCCP",
+      PPT_NODO: '/mockPagamentiTelematiciCCP',
     },
   },
 };
