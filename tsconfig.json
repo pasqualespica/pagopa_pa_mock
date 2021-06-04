@@ -1,32 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES5",
     "module": "commonjs",
-    "lib": ["ES6", "DOM"],
-
-    "allowJs": false,
-    "jsx": "react",
-    "noEmit": true,
-    "importHelpers": true,
-    "isolatedModules": true,
-
-    "strict": true,
-    "noImplicitAny": false,
-    "strictFunctionTypes": true,
-
+    "target": "es2017",
+    "sourceMap": false,
+    "declaration": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "noImplicitAny": true,
+    "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "preserveConstEnums": true,
-
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "allowUmdGlobalAccess": true,
-    "resolveJsonModule": true,
-
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "strictNullChecks": true,
+    "strictFunctionTypes": true
   },
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts"]
 }
