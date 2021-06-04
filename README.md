@@ -94,10 +94,6 @@ yarn build && yarn start
   | WINSTON_LOG_LEVEL    | desired log level             | `debug`                               |
   | PAGOPA_NODO_HOST     | host this server listens to   | `http://localhost`                    |
   | PORT                 | host this server listens to   | 8089                                  |
-  | BASE_PATH            | `host:port\<BASE_PATH>`       | `mockPagamentiTelematiciCCP`          |
-
-  | PAGOPA_NODO_PASSWORD | nodo mock auth password       | password                              |
-  | PAGOPA_PROXY_PORT    | PagoPa Proxy port             | 3001                                  |
-  | PAGOPA_WS_URI        | PagoPa Proxy SOAP service URI | `/FespCdService`                      |
+  | BASE_PATH            | `host:port\<BASE_PATH>`       | `mockPagamentiTelematiciCCP`          |                     |
   
 </details>
